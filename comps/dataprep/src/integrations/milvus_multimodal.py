@@ -212,7 +212,7 @@ class MultimodalMilvus(Milvus):
                 raise ValueError("Metadatas must be a list of dicts")
 
         if not embeddings:
-            embeddings = embedding.embed_documents(list(texts))
+            embeddings = embedding.embed_documents(texts=list(texts))
 
         batch_size = 2
         for metadata in metadatas:
