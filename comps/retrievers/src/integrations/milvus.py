@@ -65,7 +65,7 @@ class OpeaMilvusRetriever(OpeaComponent):
             logger.info("use bridge tower embedding")
             from comps.third_parties.bridgetower.src.bridgetower_embedding import BridgeTowerEmbedding
 
-            self.embeddings = BridgeTowerEmbedding()
+            embeddings = BridgeTowerEmbedding()
         else:
             # create embeddings using local embedding model
             if logflag:
