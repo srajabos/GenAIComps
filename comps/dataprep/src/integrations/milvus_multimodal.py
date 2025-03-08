@@ -640,7 +640,6 @@ class OpeaMultimodalMilvusDataprep(OpeaComponent):
 
         if logflag:
             logger.info(f"[ milvus ingest ] files:{files}")
-            logger.info(f"[ milvus ingest ] link_list:{link_list}")
 
         if files:
             accepted_media_formats = [
@@ -766,46 +765,46 @@ class OpeaMultimodalMilvusDataprep(OpeaComponent):
                                 "sub_video_id":
                                 image_idx,
                             })
-                    else:
-                        # Save caption file in upload directory
-                        caption_file_extension = os.path.splitext(
-                            matched_files[media_file][1].filename)[1]
-                        caption_file = f"{media_dir_name}{caption_file_extension}"
-                        with open(
-                                os.path.join(self.upload_folder, caption_file),
-                                "wb") as f:
-                            shutil.copyfileobj(
-                                matched_files[media_file][1].file, f)
-
-                        # Store frames and caption annotations in a new directory
-                        extract_frames_and_annotations_from_transcripts(
-                            file_id,
-                            os.path.join(self.upload_folder, media_file_name),
+                else:
+                    # Save caption file in upload directory
+                    caption_file_extension = os.path.splitext(
+                        matched_files[media_file][1].filename)[1]
+                    caption_file = f"{media_dir_name}{caption_file_extension}"
+                    with open(
                             os.path.join(self.upload_folder, caption_file),
-                            os.path.join(self.upload_folder, media_dir_name),
-                        )
+                            "wb") as f:
+                        shutil.copyfileobj(
+                            matched_files[media_file][1].file, f)
 
-                        # Delete temporary caption file
-                        os.remove(
-                            os.path.join(self.upload_folder, caption_file))
+                    # Store frames and caption annotations in a new directory
+                    extract_frames_and_annotations_from_transcripts(
+                        file_id,
+                        os.path.join(self.upload_folder, media_file_name),
+                        os.path.join(self.upload_folder, caption_file),
+                        os.path.join(self.upload_folder, media_dir_name),
+                    )
 
-                        # Ingest multimodal data into milvus
-                        self.ingest_multimodal(
-                            file_name,
-                            os.path.join(self.upload_folder, media_dir_name),
-                            self.embeddings)
+                    # Delete temporary caption file
+                    os.remove(
+                        os.path.join(self.upload_folder, caption_file))
 
-                    # Delete temporary media directory containing frames and annotations
-                    shutil.rmtree(
-                        os.path.join(self.upload_folder, media_dir_name))
+                    # Ingest multimodal data into milvus
+                    self.ingest_multimodal(
+                        file_name,
+                        os.path.join(self.upload_folder, media_dir_name),
+                        self.embeddings)
 
-                    logger.info(f"Processed file {media_file}")
+                # Delete temporary media directory containing frames and annotations
+                shutil.rmtree(
+                    os.path.join(self.upload_folder, media_dir_name))
 
-                return {
-                    "status": 200,
-                    "message": "Data preparation succeeded",
-                    "file_id_maps": uploaded_files_map,
-                }
+                logger.info(f"Processed file {media_file}")
+
+            return {
+                "status": 200,
+                "message": "Data preparation succeeded",
+                "file_id_maps": uploaded_files_map,
+            }
 
         raise HTTPException(
             status_code=400,
